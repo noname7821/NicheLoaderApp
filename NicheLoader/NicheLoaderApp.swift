@@ -29,7 +29,10 @@ struct ContentView: View {
                 .tag(1)
         }
         .accentColor(.purple)
-        .animation(.easeInOut(duration: 0.3), value: selectedTab)
+        .onChange(of: selectedTab) { _ in
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        }
         .onAppear {
             checkUpdate()
         }

@@ -16,11 +16,11 @@ struct TermsView: View {
     }
     
     var termsScreen: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             Spacer()
             
             Image(systemName: "checkmark.shield.fill")
-                .font(.system(size: 80))
+                .font(.system(size: 70))
                 .foregroundColor(.purple)
                 .scaleEffect(showContent ? 1.0 : 0.5)
                 .opacity(showContent ? 1.0 : 0.0)
@@ -49,21 +49,22 @@ struct TermsView: View {
                             .font(.footnote)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        Text("There is more text, please scroll down to see more")
-                            .font(.caption2)
-                            .foregroundColor(.purple)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, 8)
                     }
                 }
                 .padding()
             }
-            .frame(maxHeight: 350)
+            .frame(maxHeight: 320)
             .background(Color(.systemGray6))
             .cornerRadius(12)
+            .padding(.horizontal, 20)
             .opacity(showContent ? 1.0 : 0.0)
             .animation(.easeOut(duration: 0.4).delay(0.3), value: showContent)
+            
+            Text("There is more text, please scroll down to see more")
+                .font(.caption2)
+                .foregroundColor(.purple)
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.4).delay(0.35), value: showContent)
             
             Button {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
