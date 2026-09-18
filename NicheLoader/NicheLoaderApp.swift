@@ -16,23 +16,26 @@ struct ContentView: View {
     @State private var updateURL: String = ""
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(0)
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
-                .tag(1)
+        ZStack {
+            if selectedTab == 0 {
+                HomeView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+            } else {
+                SettingsView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .trailing).combined(with: .opacity)
+                    ))
+            }
         }
-        .accentColor(.purple)
-        .onChange(of: selectedTab) { _ in
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
+        .animation(.easeInOut(duration: 0.3), value: selectedTab)
+        .safeAreaInset(edge: .bottom) {
+            customTabBar
         }
+        .ignoresSafeArea(.keyboard)
         .onAppear {
             checkUpdate()
         }
@@ -47,6 +50,39 @@ struct ContentView: View {
                 },
                 secondaryButton: .cancel(Text("Continue"))
             )
+        }
+    }
+    
+    var customTabBar: some View {
+        HStack(spacing: 0) {
+            tabButton(title: "Home", icon: "house.fill", index: 0)
+            tabButton(title: "Settings", icon: "gearshape.fill", index: 1)
+        }
+        .padding(.horizontal, 40)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+        .background(
+            Color(.systemBackground)
+                .shadow(color: .black.opacity(0.05), radius: 8, y: -4)
+        )
+    }
+    
+    func tabButton(title: String, icon: String, index: Int) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                selectedTab = index
+            }
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                Text(title)
+                    .font(.caption2)
+            }
+            .foregroundColor(selectedTab == index ? .purple : .secondary)
+            .frame(maxWidth: .infinity)
         }
     }
     
