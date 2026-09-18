@@ -4,7 +4,7 @@ import SwiftUI
 struct NicheLoaderApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TermsView()
         }
     }
 }

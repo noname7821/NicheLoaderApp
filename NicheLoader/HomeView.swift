@@ -144,7 +144,7 @@ struct HomeView: View {
     }
 }
 
-// UIKit document picker - works reliably
+// document picker
 struct DocumentPickerView: UIViewControllerRepresentable {
     let onPick: (URL) -> Void
     
@@ -169,38 +169,6 @@ struct DocumentPickerView: UIViewControllerRepresentable {
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
             guard let url = urls.first else { return }
             onPick(url)
-        }
-    }
-}
-
-struct SettingsView: View {
-    var body: some View {
-        NavigationView {
-            List {
-                Section("About") {
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        Text("1.0")
-                            .foregroundColor(.secondary)
-                    }
-                    HStack {
-                        Text("Server")
-                        Spacer()
-                        Text("nicheloader.onrender.com")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Section {
-                    Text("Powered by FlashDrop ⚡")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-            }
-            .navigationTitle("Settings")
         }
     }
 }
