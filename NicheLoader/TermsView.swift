@@ -2,11 +2,14 @@ import SwiftUI
 
 struct TermsView: View {
     @AppStorage("hasAcceptedTerms") private var hasAcceptedTerms: Bool = false
-    @State private var showDetails = false
+    @State private var termsText: String = "Loading terms..."
+    @State private var isLoading: Bool = true
+    @State private var showContent: Bool = false
     
     var body: some View {
         if hasAcceptedTerms {
             ContentView()
+                .transition(.opacity)
         } else {
             termsScreen
         }
@@ -19,47 +22,53 @@ struct TermsView: View {
             Image(systemName: "checkmark.shield.fill")
                 .font(.system(size: 80))
                 .foregroundColor(.purple)
+                .scaleEffect(showContent ? 1.0 : 0.5)
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.spring(response: 0.6, dampingFraction: 0.7), value: showContent)
             
             Text("NicheLoader")
                 .font(.largeTitle)
                 .fontWeight(.bold)
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.4).delay(0.1), value: showContent)
             
             Text("Terms of Service")
                 .font(.title3)
                 .foregroundColor(.secondary)
-            
-            Text("Last updated: 2026")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.4).delay(0.2), value: showContent)
             
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    termSection(
-                        title: "1. LEGAL USE ONLY",
-                        text: "You agree to use NicheLoader only for legal purposes.\n\nDo NOT use this app to install:\n• Pirated/cracked apps\n• Software you don't own\n• Apps that violate Apple's ToS\n• Any illegal content"
-                    )
-                    
-                    termSection(
-                        title: "2. NO DATA COLLECTION",
-                        text: "NicheLoader does not collect, store, or share your personal data.\n\nYour IPAs and certificates are processed locally and on your own server (nicheloader.onrender.com).\n\nNo analytics, no tracking, no telemetry."
-                    )
-                    
-                    termSection(
-                        title: "3. NO WARRANTY",
-                        text: "This app is provided \"as is\" without warranty.\n\nThe developers are not responsible for:\n• Account bans from Apple\n• App crashes\n• Data loss\n• Legal issues from misuse"
-                    )
-                    
-                    termSection(
-                        title: "4. YOUR RESPONSIBILITY",
-                        text: "You are 100% responsible for:\n• The IPAs you sign\n• Your certificates\n• Your actions with this app"
-                    )
+                VStack(alignment: .leading, spacing: 12) {
+                    if isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text(termsText)
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        Text("There is more text, please scroll down to see more")
+                            .font(.caption2)
+                            .foregroundColor(.purple)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, 8)
+                    }
                 }
                 .padding()
             }
             .frame(maxHeight: 350)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .opacity(showContent ? 1.0 : 0.0)
+            .animation(.easeOut(duration: 0.4).delay(0.3), value: showContent)
             
             Button {
-                hasAcceptedTerms = true
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                    hasAcceptedTerms = true
+                }
             } label: {
                 Text("I Agree")
                     .fontWeight(.bold)
@@ -70,6 +79,8 @@ struct TermsView: View {
                     .cornerRadius(15)
             }
             .padding(.horizontal, 30)
+            .opacity(showContent ? 1.0 : 0.0)
+            .animation(.easeOut(duration: 0.4).delay(0.4), value: showContent)
             
             Button {
                 exit(0)
@@ -77,20 +88,27 @@ struct TermsView: View {
                 Text("Decline")
                     .foregroundColor(.red)
             }
+            .opacity(showContent ? 1.0 : 0.0)
+            .animation(.easeOut(duration: 0.4).delay(0.5), value: showContent)
             
             Spacer()
         }
         .padding()
+        .onAppear {
+            loadTerms()
+            withAnimation {
+                showContent = true
+            }
+        }
     }
     
-    func termSection(title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.headline)
-                .foregroundColor(.purple)
-            Text(text)
-                .font(.footnote)
-                .foregroundColor(.secondary)
+    func loadTerms() {
+        let url = "https://raw.githubusercontent.com/noname7821/NicheLoaderApp/main/updates/terms.txt"
+        UpdateChecker.fetchText(url) { text in
+            DispatchQueue.main.async {
+                self.termsText = text ?? "Failed to load terms."
+                self.isLoading = false
+            }
         }
     }
 }

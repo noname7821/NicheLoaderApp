@@ -1,0 +1,40 @@
+NicheLoader - Terms of Service
+
+Last updated: 2026
+
+1. LEGAL USE ONLY
+
+You agree to use NicheLoader only for legal purposes.
+
+Do NOT use this app to install:
+- Pirated / cracked apps
+- Software you don't own
+- Apps that violate Apple's ToS
+- Any illegal content
+
+2. NO DATA COLLECTION
+
+NicheLoader does not collect, store, or share your personal data.
+
+Everything stays on your device.
+
+No analytics, no tracking, no telemetry.
+
+3. NO WARRANTY
+
+This app is provided "as is" without warranty.
+
+The developers are not responsible for:
+- Account bans from Apple
+- App crashes
+- Data loss
+- Legal issues from misuse
+
+4. YOUR RESPONSIBILITY
+
+You are 100% responsible for:
+- The IPAs you sign
+- Your certificates
+- Your actions with this app
+
+By tapping "I Agree" you accept these terms.

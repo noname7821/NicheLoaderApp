@@ -11,15 +11,14 @@ struct HomeView: View {
     @State private var showIPAImporter: Bool = false
     @State private var showP12Importer: Bool = false
     @State private var showProvisionImporter: Bool = false
+    @State private var showContent: Bool = false
     
     var body: some View {
         NavigationView {
             Form {
                 Section("Files") {
                     Button {
-                        DispatchQueue.main.async {
-                            showIPAImporter = true
-                        }
+                        showIPAImporter = true
                     } label: {
                         HStack {
                             Image(systemName: "doc.fill")
@@ -29,9 +28,7 @@ struct HomeView: View {
                     }
                     
                     Button {
-                        DispatchQueue.main.async {
-                            showP12Importer = true
-                        }
+                        showP12Importer = true
                     } label: {
                         HStack {
                             Image(systemName: "lock.fill")
@@ -41,9 +38,7 @@ struct HomeView: View {
                     }
                     
                     Button {
-                        DispatchQueue.main.async {
-                            showProvisionImporter = true
-                        }
+                        showProvisionImporter = true
                     } label: {
                         HStack {
                             Image(systemName: "doc.text.fill")
@@ -52,10 +47,14 @@ struct HomeView: View {
                         }
                     }
                 }
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.4).delay(0.05), value: showContent)
                 
                 Section("Certificate Password") {
                     SecureField("Password", text: $password)
                 }
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.4).delay(0.1), value: showContent)
                 
                 Section {
                     Button {
@@ -80,27 +79,30 @@ struct HomeView: View {
                     .disabled(selectedIPA == nil || isSigning)
                     .listRowBackground(Color.purple.opacity(0.2))
                 }
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.4).delay(0.15), value: showContent)
                 
                 Section("Status") {
                     Text(statusText)
                         .font(.system(.footnote, design: .monospaced))
                         .foregroundColor(.secondary)
                 }
+                .opacity(showContent ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.4).delay(0.2), value: showContent)
             }
             .navigationTitle("NicheLoader")
             .sheet(isPresented: $showIPAImporter) {
-                DocumentPickerView { url in
-                    selectedIPA = url
-                }
+                DocumentPickerView { url in selectedIPA = url }
             }
             .sheet(isPresented: $showP12Importer) {
-                DocumentPickerView { url in
-                    p12File = url
-                }
+                DocumentPickerView { url in p12File = url }
             }
             .sheet(isPresented: $showProvisionImporter) {
-                DocumentPickerView { url in
-                    provisionFile = url
+                DocumentPickerView { url in provisionFile = url }
+            }
+            .onAppear {
+                withAnimation {
+                    showContent = true
                 }
             }
         }
@@ -109,37 +111,56 @@ struct HomeView: View {
     func startSigning() {
         guard let ipa = selectedIPA else { return }
         isSigning = true
-        statusText = "Uploading IPA..."
+        
+        withAnimation {
+            statusText = "Uploading IPA..."
+        }
         
         Task {
             do {
                 try await ServerAPI.uploadIPA(ipa)
-                statusText = "IPA uploaded ✓"
+                await MainActor.run {
+                    withAnimation { statusText = "IPA uploaded" }
+                }
                 
                 if let p12 = p12File, let prov = provisionFile {
-                    statusText = "Uploading certificate..."
+                    await MainActor.run {
+                        withAnimation { statusText = "Uploading certificate..." }
+                    }
                     try await ServerAPI.uploadP12(p12)
                     
-                    statusText = "Uploading provision..."
+                    await MainActor.run {
+                        withAnimation { statusText = "Uploading provision..." }
+                    }
                     try await ServerAPI.uploadProvision(prov)
                     
-                    statusText = "Sending password..."
+                    await MainActor.run {
+                        withAnimation { statusText = "Sending password..." }
+                    }
                     try await ServerAPI.sendPassword(password)
                 }
                 
-                statusText = "Signing on server..."
+                await MainActor.run {
+                    withAnimation { statusText = "Signing on server..." }
+                }
                 try await ServerAPI.sign()
                 
-                statusText = "Installing..."
                 await MainActor.run {
+                    withAnimation { statusText = "Installing..." }
                     ServerAPI.install()
                 }
                 
-                statusText = "Done ✓"
+                await MainActor.run {
+                    withAnimation { statusText = "Done" }
+                }
             } catch {
-                statusText = "Error: \(error.localizedDescription)"
+                await MainActor.run {
+                    withAnimation { statusText = "Error: \(error.localizedDescription)" }
+                }
             }
-            isSigning = false
+            await MainActor.run {
+                isSigning = false
+            }
         }
     }
 }
