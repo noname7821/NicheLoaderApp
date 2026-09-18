@@ -8,7 +8,6 @@ struct HomeView: View {
     @State private var password: String = ""
     @State private var statusText: String = "Ready"
     @State private var isSigning: Bool = false
-    @State private var showPasswordAlert: Bool = false
     @State private var showIPAImporter: Bool = false
     @State private var showP12Importer: Bool = false
     @State private var showProvisionImporter: Bool = false
@@ -18,7 +17,9 @@ struct HomeView: View {
             Form {
                 Section("Files") {
                     Button {
-                        showIPAImporter = true
+                        DispatchQueue.main.async {
+                            showIPAImporter = true
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "doc.fill")
@@ -28,7 +29,9 @@ struct HomeView: View {
                     }
                     
                     Button {
-                        showP12Importer = true
+                        DispatchQueue.main.async {
+                            showP12Importer = true
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "lock.fill")
@@ -38,7 +41,9 @@ struct HomeView: View {
                     }
                     
                     Button {
-                        showProvisionImporter = true
+                        DispatchQueue.main.async {
+                            showProvisionImporter = true
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "doc.text.fill")
@@ -83,14 +88,20 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("NicheLoader")
-            .fileImporter(isPresented: $showIPAImporter, allowedContentTypes: [UTType(filenameExtension: "ipa") ?? .data]) { result in
-                if case .success(let url) = result { selectedIPA = url }
+            .sheet(isPresented: $showIPAImporter) {
+                DocumentPickerView { url in
+                    selectedIPA = url
+                }
             }
-            .fileImporter(isPresented: $showP12Importer, allowedContentTypes: [UTType(filenameExtension: "p12") ?? .data]) { result in
-                if case .success(let url) = result { p12File = url }
+            .sheet(isPresented: $showP12Importer) {
+                DocumentPickerView { url in
+                    p12File = url
+                }
             }
-            .fileImporter(isPresented: $showProvisionImporter, allowedContentTypes: [UTType(filenameExtension: "mobileprovision") ?? .data]) { result in
-                if case .success(let url) = result { provisionFile = url }
+            .sheet(isPresented: $showProvisionImporter) {
+                DocumentPickerView { url in
+                    provisionFile = url
+                }
             }
         }
     }
@@ -129,6 +140,35 @@ struct HomeView: View {
                 statusText = "Error: \(error.localizedDescription)"
             }
             isSigning = false
+        }
+    }
+}
+
+// UIKit document picker - works reliably
+struct DocumentPickerView: UIViewControllerRepresentable {
+    let onPick: (URL) -> Void
+    
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.item], asCopy: true)
+        picker.delegate = context.coordinator
+        picker.allowsMultipleSelection = false
+        picker.shouldShowFileExtensions = true
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onPick: onPick)
+    }
+    
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let onPick: (URL) -> Void
+        init(onPick: @escaping (URL) -> Void) { self.onPick = onPick }
+        
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else { return }
+            onPick(url)
         }
     }
 }
