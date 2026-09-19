@@ -12,6 +12,12 @@
 		A1000005 /* ServerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006 /* ServerAPI.swift */; };
 		A1000010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011 /* SettingsView.swift */; };
 		A1000012 /* TermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013 /* TermsView.swift */; };
+		A1000050 /* RepoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051 /* RepoView.swift */; };
+		A1000048 /* RepoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000049 /* RepoManager.swift */; };
+		A1000046 /* CertificateViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000047 /* CertificateViews.swift */; };
+		A1000044 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000045 /* LibraryView.swift */; };
+		A1000042 /* LibraryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000043 /* LibraryManager.swift */; };
+		A1000040 /* CertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000041 /* CertificateManager.swift */; };
 		A1000030 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000031 /* Assets.xcassets */; };
 		A1000021 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000022 /* UpdateChecker.swift */; };
 /* End PBXBuildFile section */
@@ -24,6 +30,12 @@
 		A1000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000011 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1000013 /* TermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsView.swift; sourceTree = "<group>"; };
+		A1000051 /* RepoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoView.swift; sourceTree = "<group>"; };
+		A1000049 /* RepoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoManager.swift; sourceTree = "<group>"; };
+		A1000047 /* CertificateViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CertificateViews.swift; sourceTree = "<group>"; };
+		A1000045 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		A1000043 /* LibraryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryManager.swift; sourceTree = "<group>"; };
+		A1000041 /* CertificateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CertificateManager.swift; sourceTree = "<group>"; };
 		A1000031 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1000022 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -54,6 +66,12 @@
 				A1000004 /* HomeView.swift */,
 				A1000011 /* SettingsView.swift */,
 				A1000013 /* TermsView.swift */,
+				A1000041 /* CertificateManager.swift */,
+				A1000043 /* LibraryManager.swift */,
+				A1000045 /* LibraryView.swift */,
+				A1000047 /* CertificateViews.swift */,
+				A1000049 /* RepoManager.swift */,
+				A1000051 /* RepoView.swift */,
 				A1000022 /* UpdateChecker.swift */,
 				A1000006 /* ServerAPI.swift */,
 				A1000008 /* Info.plist */,
@@ -144,6 +162,12 @@
 				A1000005 /* ServerAPI.swift in Sources */,
 				A1000010 /* SettingsView.swift in Sources */,
 				A1000012 /* TermsView.swift in Sources */,
+				A1000040 /* CertificateManager.swift in Sources */,
+				A1000042 /* LibraryManager.swift in Sources */,
+				A1000044 /* LibraryView.swift in Sources */,
+				A1000046 /* CertificateViews.swift in Sources */,
+				A1000048 /* RepoManager.swift in Sources */,
+				A1000050 /* RepoView.swift in Sources */,
 				A1000021 /* UpdateChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -23,11 +23,21 @@ struct ContentView: View {
                     Label("Home", systemImage: "house.fill")
                 }
                 .tag(0)
+            LibraryView()
+                .tabItem {
+                    Label("Library", systemImage: "square.grid.2x2.fill")
+                }
+                .tag(1)
+            RepoView()
+                .tabItem {
+                    Label("Repos", systemImage: "globe")
+                }
+                .tag(2)
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
-                .tag(1)
+                .tag(3)
         }
         .accentColor(.purple)
         .onChange(of: selectedTab) { _ in
