@@ -18,40 +18,24 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
+            FileManagerView()
+                .tabItem { Label("Files", systemImage: "folder.fill") }
                 .tag(0)
             LibraryView()
-                .tabItem {
-                    Label("Library", systemImage: "square.grid.2x2.fill")
-                }
+                .tabItem { Label("Library", systemImage: "square.grid.2x2.fill") }
                 .tag(1)
-            FileManagerView()
-                .tabItem {
-                    Label("Files", systemImage: "folder.fill")
-                }
-                .tag(2)
             RepoView()
-                .tabItem {
-                    Label("Repos", systemImage: "globe")
-                }
+                .tabItem { Label("App Store", systemImage: "plus.app.fill") }
+                .tag(2)
+            DownloadsView()
+                .tabItem { Label("Downloads", systemImage: "square.and.arrow.down.fill") }
                 .tag(3)
             SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
+                .tabItem { Label("Settings", systemImage: "gearshape.2.fill") }
                 .tag(4)
         }
-        .accentColor(.purple)
-        .onChange(of: selectedTab) { _ in
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
-        }
-        .onAppear {
-            checkUpdate()
-        }
+        .tint(.blue)
+        .onAppear { checkUpdate() }
         .alert(isPresented: $showUpdate) {
             Alert(
                 title: Text(updateMessage),

@@ -12,107 +12,75 @@ struct HomeView: View {
     @State private var progress: Double = 0
     @State private var statusText = "Ready"
     @State private var errorMessage: String?
-    @State private var showContent = false
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // header
-                    VStack(spacing: 12) {
-                        Image(systemName: "shippingbox.fill")
-                            .font(.system(size: 70))
-                            .foregroundStyle(
-                                LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing)
-                            )
-                        Text("NicheLoader")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        Text("Sign and install IPAs")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+            List {
+                // IPA Section
+                Section("IPA File") {
+                    Button {
+                        showIPAImporter = true
+                    } label: {
+                        HStack {
+                            Text(selectedIPA?.lastPathComponent ?? "Select IPA")
+                                .foregroundColor(.blue)
+                                .lineLimit(1)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                    .padding(.top, 30)
-                    
-                    // IPA card
-                    card(title: "IPA File", icon: "doc.fill") {
+                }
+                
+                // Certificate Section
+                Section("Certificate") {
+                    if let cert = certManager.selected() {
                         Button {
-                            showIPAImporter = true
+                            showCertPicker = true
                         } label: {
                             HStack {
-                                Text(selectedIPA?.lastPathComponent ?? "Select IPA")
-                                    .foregroundColor(selectedIPA != nil ? .purple : .secondary)
-                                    .lineLimit(1)
+                                Image(systemName: "checkmark.seal.fill")
+                                    .foregroundColor(.blue)
+                                VStack(alignment: .leading) {
+                                    Text(cert.name)
+                                        .foregroundColor(.primary)
+                                    Text(cert.date.formatted(date: .abbreviated, time: .omitted))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
                                     .font(.footnote)
+                                    .foregroundColor(.secondary)
                             }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(12)
                         }
-                    }
-                    
-                    // Certificate card
-                    card(title: "Certificate", icon: "lock.fill") {
-                        if let cert = certManager.selected() {
-                            Button {
-                                showCertPicker = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .foregroundColor(.green)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(cert.name)
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.primary)
-                                        Text("Tap to change")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.secondary)
-                                        .font(.footnote)
-                                }
-                                .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
-                            }
-                        } else {
-                            Button {
-                                showCertPicker = true
-                            } label: {
-                                HStack {
-                                    Text("Add Certificate")
-                                        .foregroundColor(.purple)
-                                    Spacer()
-                                    Image(systemName: "plus.circle.fill")
-                                        .foregroundColor(.purple)
-                                }
-                                .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
+                    } else {
+                        Button {
+                            showCertPicker = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.blue)
+                                Text("Import Certificate")
+                                    .foregroundColor(.blue)
+                                Spacer()
                             }
                         }
                     }
-                    
-                    // Sign button
+                }
+                
+                // Sign Section
+                Section {
                     if isSigning {
-                        VStack(spacing: 12) {
+                        VStack(spacing: 8) {
                             ProgressView(value: progress)
-                                .progressViewStyle(.linear)
-                                .tint(.purple)
+                                .tint(.blue)
                             Text(statusText)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
+                        .padding(.vertical, 4)
                     } else {
                         Button {
                             startSigning()
@@ -120,65 +88,31 @@ struct HomeView: View {
                             HStack {
                                 Image(systemName: "signature")
                                 Text("Sign & Install")
-                                    .fontWeight(.bold)
+                                    .fontWeight(.semibold)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
-                            )
-                            .foregroundColor(.white)
-                            .cornerRadius(15)
+                            .foregroundColor(.blue)
                         }
-                        .padding(.horizontal)
                         .disabled(selectedIPA == nil || certManager.selected() == nil)
-                        .opacity((selectedIPA == nil || certManager.selected() == nil) ? 0.5 : 1)
                     }
-                    
-                    if let error = errorMessage {
+                }
+                
+                if let error = errorMessage {
+                    Section {
                         Text(error)
                             .font(.caption)
                             .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                            .padding()
-                            .background(Color.red.opacity(0.1))
-                            .cornerRadius(12)
-                            .padding(.horizontal)
                     }
-                    
-                    Spacer()
                 }
-                .padding()
             }
-            .navigationTitle("Home")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Sign")
             .sheet(isPresented: $showIPAImporter) {
                 DocumentPickerView { url in selectedIPA = url }
             }
             .sheet(isPresented: $showCertPicker) {
                 CertificatePickerView()
             }
-            .onAppear {
-                withAnimation { showContent = true }
-            }
         }
-    }
-    
-    func card<Content: View>(title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(.purple)
-                Text(title)
-                    .font(.headline)
-            }
-            content()
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
-        .padding(.horizontal)
     }
     
     func startSigning() {
@@ -238,7 +172,7 @@ struct HomeView: View {
             } catch {
                 await MainActor.run {
                     isSigning = false
-                    errorMessage = "Error: \(error.localizedDescription)"
+                    errorMessage = error.localizedDescription
                 }
             }
         }
@@ -246,14 +180,13 @@ struct HomeView: View {
     
     func updateProgress(_ value: Double, _ text: String) async {
         await MainActor.run {
-            withAnimation { progress = value }
+            progress = value
             statusText = text
         }
         try? await Task.sleep(nanoseconds: 300_000_000)
     }
 }
 
-// document picker
 struct DocumentPickerView: UIViewControllerRepresentable {
     let onPick: (URL) -> Void
     
