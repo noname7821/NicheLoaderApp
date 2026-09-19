@@ -34,7 +34,11 @@ struct ContentView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape.2.fill") }
                 .tag(4)
         }
-        .tint(.blue)
+        .tint(.purple)
+        .onChange(of: selectedTab) { _ in
+            let g = UIImpactFeedbackGenerator(style: .light)
+            g.impactOccurred()
+        }
         .onAppear { checkUpdate() }
         .alert(isPresented: $showUpdate) {
             Alert(

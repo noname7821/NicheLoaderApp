@@ -4,55 +4,79 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
-                // About Section
-                Section("About") {
+                // About
+                Section {
                     NavigationLink {
-                        InfoView()
+                        AboutView()
                     } label: {
                         Label {
                             Text("About")
                         } icon: {
                             Image(systemName: "info.circle")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.purple)
                         }
                     }
                 }
                 
-                // Features Section
+                // Appearance
+                Section {
+                    NavigationLink {
+                        AppearanceView()
+                    } label: {
+                        Label {
+                            Text("App Icon")
+                        } icon: {
+                            Image(systemName: "app.badge")
+                                .foregroundColor(.purple)
+                        }
+                    }
+                    NavigationLink {
+                        AppearanceView()
+                    } label: {
+                        Label {
+                            Text("Appearance")
+                        } icon: {
+                            Image(systemName: "paintbrush")
+                                .foregroundColor(.purple)
+                        }
+                    }
+                }
+                
+                // Features
                 Section("Features") {
                     NavigationLink {
-                        InfoView()
+                        LogsView()
                     } label: {
                         Label {
                             Text("Logs")
                         } icon: {
                             Image(systemName: "apple.terminal")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.purple)
                         }
                     }
                     NavigationLink {
-                        InfoView()
-                    } label: {
-                        Label {
-                            Text("App Features")
-                        } icon: {
-                            Image(systemName: "sparkles")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    NavigationLink {
-                        CertificatePickerView()
+                        CertificatesSettingsView()
                     } label: {
                         Label {
                             Text("Certificates")
                         } icon: {
                             Image(systemName: "signature")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.purple)
+                        }
+                    }
+                    NavigationLink {
+                        Text("Signing Options")
+                    } label: {
+                        Label {
+                            Text("Signing Options")
+                        } icon: {
+                            Image(systemName: "gear")
+                                .foregroundColor(.purple)
                         }
                     }
                 }
                 
-                // Misc Section
+                // Misc
                 Section("Misc") {
                     Button {
                         if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -61,41 +85,25 @@ struct SettingsView: View {
                     } label: {
                         Label {
                             Text("Open Settings")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.purple)
                         } icon: {
                             Image(systemName: "gear")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.purple)
                         }
                     }
                 }
                 
-                // Info text
                 Section {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Use Responsibly")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                        Text("Do NOT use NicheLoader for pirated apps or illegal software. Only sign apps you legally own.")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("No Data Collection")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                        Text("Nothing leaves your device. No analytics. No tracking.")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                // Version
-                Section {
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.3")
-                            .foregroundColor(.secondary)
+                    NavigationLink {
+                        Text("Reset")
+                    } label: {
+                        Label {
+                            Text("Reset")
+                                .foregroundColor(.red)
+                        } icon: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
                     }
                 }
             }
@@ -104,20 +112,30 @@ struct SettingsView: View {
     }
 }
 
-struct InfoView: View {
+struct AboutView: View {
     var body: some View {
         List {
             Section {
                 VStack(spacing: 12) {
-                    Image(systemName: "shippingbox.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(
-                            LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        )
+                    if let icon = UIImage(named: "AppIcon") {
+                        Image(uiImage: icon)
+                            .resizable()
+                            .frame(width: 80, height: 80)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                    } else {
+                        RoundedRectangle(cornerRadius: 18)
+                            .fill(Color.purple)
+                            .frame(width: 80, height: 80)
+                            .overlay(
+                                Image(systemName: "shippingbox.fill")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 40))
+                            )
+                    }
                     Text("NicheLoader")
-                        .font(.title)
+                        .font(.title2)
                         .fontWeight(.bold)
-                    Text("Version 1.0.3")
+                    Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.3")")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -130,54 +148,44 @@ struct InfoView: View {
                 Link(destination: URL(string: "https://github.com/noname7821")!) {
                     HStack(spacing: 12) {
                         AsyncImage(url: URL(string: "https://avatars.githubusercontent.com/u/210064350?s=400&u=539b1b1eb9554c4654472d091675d6804f0ff3df&v=4")) { image in
-                            image.resizable().aspectRatio(contentMode: .fill)
+                            image.resizable()
                         } placeholder: {
                             Color.gray
                         }
-                        .frame(width: 44, height: 44)
+                        .frame(width: 50, height: 50)
                         .clipShape(Circle())
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Mintoo")
-                                .font(.headline)
-                                .foregroundColor(.primary)
+                                .font(.headline).foregroundColor(.primary)
                             Text("Solo Developer")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.caption).foregroundColor(.secondary)
                         }
-                        
                         Spacer()
-                        
                         Image(systemName: "arrow.up.right")
-                            .foregroundColor(.secondary)
-                            .font(.footnote)
+                            .font(.footnote).foregroundColor(.secondary)
                     }
                 }
                 
                 Link(destination: URL(string: "https://www.tiktok.com/@filmeacc")!) {
                     HStack(spacing: 12) {
                         AsyncImage(url: URL(string: "https://p16-common-sign.tiktokcdn-eu.com/tos-no1a-avt-0068c001-no/55493ade73a29ea3c127a707d9383110~tplv-tiktokx-cropcenter:100:100.jpeg")) { image in
-                            image.resizable().aspectRatio(contentMode: .fill)
+                            image.resizable()
                         } placeholder: {
                             Color.gray
                         }
-                        .frame(width: 44, height: 44)
+                        .frame(width: 50, height: 50)
                         .clipShape(Circle())
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Filmeacc")
-                                .font(.headline)
-                                .foregroundColor(.primary)
+                                .font(.headline).foregroundColor(.primary)
                             Text("Just my TikTok account")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.caption).foregroundColor(.secondary)
                         }
-                        
                         Spacer()
-                        
                         Image(systemName: "arrow.up.right")
-                            .foregroundColor(.secondary)
-                            .font(.footnote)
+                            .font(.footnote).foregroundColor(.secondary)
                     }
                 }
             }
@@ -193,5 +201,147 @@ struct InfoView: View {
         }
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct AppearanceView: View {
+    @AppStorage("appColor") private var appColor: String = "purple"
+    
+    let colors: [(String, Color)] = [
+        ("Default", .purple),
+        ("Cherry", Color(red: 1.0, green: 0.4, blue: 0.5)),
+        ("Red", .red),
+        ("Orange", .orange),
+        ("Yellow", .yellow),
+        ("Green", .green),
+        ("Blue", .blue),
+        ("Purple", .purple),
+        ("Pink", .pink),
+        ("Indigo", .indigo),
+        ("Mint", .mint),
+        ("Cyan", .cyan),
+        ("Teal", .teal)
+    ]
+    
+    var body: some View {
+        List {
+            Section("Accent Color") {
+                ForEach(colors, id: \.0) { name, color in
+                    Button {
+                        appColor = name.lowercased()
+                    } label: {
+                        HStack {
+                            Circle()
+                                .fill(color)
+                                .frame(width: 24, height: 24)
+                            Text(name)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if appColor == name.lowercased() {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.purple)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Appearance")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct LogsView: View {
+    var body: some View {
+        List {
+            Text("No logs yet")
+                .foregroundColor(.secondary)
+        }
+        .navigationTitle("Logs")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct CertificatesSettingsView: View {
+    @StateObject var certManager = CertificateManager.shared
+    @State private var showAdd = false
+    
+    var body: some View {
+        Group {
+            if certManager.certificates.isEmpty {
+                VStack(spacing: 16) {
+                    Spacer()
+                    Image(systemName: "questionmark.folder.fill")
+                        .font(.system(size: 64))
+                        .foregroundColor(.secondary)
+                    Text("No Certificates")
+                        .font(.title3).fontWeight(.semibold)
+                    Text("Get started signing by importing your first certificate.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Button {
+                        showAdd = true
+                    } label: {
+                        Text("Import")
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 10)
+                            .background(Color(.systemGray6))
+                            .foregroundColor(.purple)
+                            .clipShape(Capsule())
+                    }
+                    Spacer()
+                }
+                .navigationTitle("Certificates")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            showAdd = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+            } else {
+                List {
+                    ForEach(certManager.certificates) { cert in
+                        HStack {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(.purple)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(cert.name).font(.headline)
+                                Text(cert.date.formatted(date: .abbreviated, time: .omitted))
+                                    .font(.caption).foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                certManager.delete(cert)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+                .navigationTitle("Certificates")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            showAdd = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showAdd) {
+            AddCertificateView()
+        }
     }
 }
