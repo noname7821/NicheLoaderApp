@@ -6,7 +6,27 @@
 	objectVersion = 56;
 	objects = {
 
+/* Begin XCRemoteSwiftPackageReference section */
+		A1000070 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1000071 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1000070 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
+
 /* Begin PBXBuildFile section */
+		A1000072 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = A1000071 /* ZIPFoundation */; };
 		A1000001 /* NicheLoaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002 /* NicheLoaderApp.swift */; };
 		A1000003 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004 /* HomeView.swift */; };
 		A1000005 /* ServerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006 /* ServerAPI.swift */; };
@@ -49,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1000072 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +131,9 @@
 			dependencies = (
 			);
 			name = NicheLoader;
+			packageProductDependencies = (
+				A1000071 /* ZIPFoundation */,
+			);
 			productName = NicheLoader;
 			productReference = A1000007 /* NicheLoader.app */;
 			productType = "com.apple.product-type.application";
@@ -119,6 +143,9 @@
 /* Begin PBXProject section */
 		A1000015 /* Project object */ = {
 			isa = PBXProject;
+			packageReferences = (
+				A1000070 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
