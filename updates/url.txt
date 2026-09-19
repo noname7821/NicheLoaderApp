@@ -1,1 +1,1 @@
-https://github.com/noname7821/NicheLoaderApp/releases/latest/download/NicheLoader.ipa
+https://github.com/noname7821/NicheLoaderApp/releases/download/v1.0.1/NicheLoader.ipa
