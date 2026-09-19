@@ -32,6 +32,7 @@
 		A1000005 /* ServerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006 /* ServerAPI.swift */; };
 		A1000010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011 /* SettingsView.swift */; };
 		A1000012 /* TermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013 /* TermsView.swift */; };
+		A1000080 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000081 /* DownloadsView.swift */; };
 		A1000062 /* FileManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000063 /* FileManagerView.swift */; };
 		A1000060 /* IPAReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000061 /* IPAReader.swift */; };
 		A1000050 /* RepoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051 /* RepoView.swift */; };
@@ -52,6 +53,7 @@
 		A1000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000011 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1000013 /* TermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsView.swift; sourceTree = "<group>"; };
+		A1000081 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		A1000063 /* FileManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerView.swift; sourceTree = "<group>"; };
 		A1000061 /* IPAReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPAReader.swift; sourceTree = "<group>"; };
 		A1000051 /* RepoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoView.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				A1000006 /* ServerAPI.swift */,
 				A1000061 /* IPAReader.swift */,
 				A1000063 /* FileManagerView.swift */,
+				A1000081 /* DownloadsView.swift */,
 				A1000008 /* Info.plist */,
 				A1000031 /* Assets.xcassets */,
 			);
@@ -197,6 +200,7 @@
 				A1000012 /* TermsView.swift in Sources */,
 				A1000062 /* FileManagerView.swift in Sources */,
 				A1000060 /* IPAReader.swift in Sources */,
+				A1000080 /* DownloadsView.swift in Sources */,
 				A1000040 /* CertificateManager.swift in Sources */,
 				A1000042 /* LibraryManager.swift in Sources */,
 				A1000044 /* LibraryView.swift in Sources */,
