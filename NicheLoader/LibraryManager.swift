@@ -47,13 +47,13 @@ class LibraryManager: ObservableObject {
     
     func documentsPath() -> String {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.path()
+        return docs.path
     }
     
     func signedAppsPath() -> String {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let signed = docs.appendingPathComponent("Signed")
         try? FileManager.default.createDirectory(at: signed, withIntermediateDirectories: true)
-        return signed.path()
+        return signed.path
     }
 }
