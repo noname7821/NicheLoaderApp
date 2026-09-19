@@ -60,27 +60,29 @@ struct HomeView: View {
                     card(title: "Certificate", icon: "lock.fill") {
                         VStack(spacing: 10) {
                             if let cert = certManager.selected() {
-                                HStack {
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .foregroundColor(.green)
-                                    VStack(alignment: .leading) {
-                                        Text(cert.name)
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
-                                        Text("Selected")
-                                            .font(.caption)
+                                Button {
+                                    showCertPicker = true
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "checkmark.seal.fill")
+                                            .foregroundColor(.green)
+                                        VStack(alignment: .leading) {
+                                            Text(cert.name)
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(.primary)
+                                            Text("Tap to change")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
                                             .foregroundColor(.secondary)
                                     }
-                                    Spacer()
-                                    Button("Change") {
-                                        showCertPicker = true
-                                    }
-                                    .font(.caption)
-                                    .foregroundColor(.purple)
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(12)
                                 }
-                                .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
                             } else {
                                 Button {
                                     showAddCert = true
@@ -134,8 +136,8 @@ struct HomeView: View {
                             .cornerRadius(15)
                         }
                         .padding(.horizontal)
-                        .disabled(selectedIPA == nil)
-                        .opacity(selectedIPA == nil ? 0.5 : 1)
+                        .disabled(selectedIPA == nil || certManager.selected() == nil)
+                        .opacity((selectedIPA == nil || certManager.selected() == nil) ? 0.5 : 1)
                     }
                     
                     Spacer()
@@ -178,20 +180,20 @@ struct HomeView: View {
     
     func startSigning() {
         guard let ipa = selectedIPA else { return }
-        guard let cert = certManager.selected() else {
-            statusText = "No certificate selected"
-            return
-        }
+        guard let cert = certManager.selected() else { return }
         
         isSigning = true
         progress = 0
         
         Task {
             do {
-                await updateProgress(0.1, "Uploading IPA...")
+                await updateProgress(0.1, "Reading IPA metadata...")
+                let metadata = IPAReader.read(from: ipa.path) ?? IPAMetadata(bundleID: "unknown", name: ipa.lastPathComponent, version: "1.0", iconData: nil)
+                
+                await updateProgress(0.2, "Uploading IPA...")
                 try await ServerAPI.uploadIPA(ipa)
                 
-                await updateProgress(0.3, "Uploading certificate...")
+                await updateProgress(0.4, "Uploading certificate...")
                 try await ServerAPI.uploadP12(URL(fileURLWithPath: cert.p12Path))
                 
                 await updateProgress(0.5, "Uploading provision...")
@@ -203,8 +205,19 @@ struct HomeView: View {
                 await updateProgress(0.7, "Signing on server...")
                 try await ServerAPI.sign()
                 
-                await updateProgress(0.9, "Downloading signed IPA...")
-                try await downloadSignedIPA(name: ipa.lastPathComponent)
+                await updateProgress(0.85, "Downloading signed IPA...")
+                let signedPath = try await downloadSignedIPA(name: ipa.lastPathComponent)
+                
+                await updateProgress(0.95, "Saving to library...")
+                await MainActor.run {
+                    libraryManager.add(
+                        name: metadata.name,
+                        bundleID: metadata.bundleID,
+                        version: metadata.version,
+                        ipaPath: signedPath,
+                        iconData: metadata.iconData
+                    )
+                }
                 
                 await updateProgress(1.0, "Installing...")
                 ServerAPI.install()
@@ -232,22 +245,13 @@ struct HomeView: View {
         try? await Task.sleep(nanoseconds: 200_000_000)
     }
     
-    func downloadSignedIPA(name: String) async throws {
+    func downloadSignedIPA(name: String) async throws -> String {
         let url = URL(string: "\(ServerAPI.baseURL)/output.ipa")!
         let (data, _) = try await URLSession.shared.data(from: url)
         
-        let path = LibraryManager.shared.signedAppsPath() + "/" + name
-        try data.write(to: URL(fileURLWithPath: path))
-        
-        let appName = name.replacingOccurrences(of: ".ipa", with: "")
-        await MainActor.run {
-            LibraryManager.shared.add(
-                name: appName,
-                bundleID: "com.signed.\(appName.lowercased())",
-                version: "1.0",
-                path: path
-            )
-        }
+        let tempPath = NSTemporaryDirectory() + "/" + name
+        try data.write(to: URL(fileURLWithPath: tempPath))
+        return tempPath
     }
 }
 

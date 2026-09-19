@@ -1,11 +1,13 @@
 import Foundation
+import UIKit
 
 struct SignedApp: Codable, Identifiable {
     let id: UUID
     let name: String
     let bundleID: String
     let version: String
-    let path: String
+    let ipaPath: String
+    let iconFileName: String?
     let date: Date
 }
 
@@ -33,27 +35,58 @@ class LibraryManager: ObservableObject {
         }
     }
     
-    func add(name: String, bundleID: String, version: String, path: String) {
-        let app = SignedApp(id: UUID(), name: name, bundleID: bundleID, version: version, path: path, date: Date())
+    func add(name: String, bundleID: String, version: String, ipaPath: String, iconData: Data?) {
+        let id = UUID()
+        
+        // move IPA into app dir
+        let appDir = appDirectory(forID: id)
+        let ipaFileName = (ipaPath as NSString).lastPathComponent
+        let destIPA = appDir.appendingPathComponent(ipaFileName)
+        try? FileManager.default.removeItem(at: destIPA)
+        try? FileManager.default.copyItem(at: URL(fileURLWithPath: ipaPath), to: destIPA)
+        
+        // save icon
+        var iconFileName: String? = nil
+        if let iconData = iconData {
+            let iconFile = appDir.appendingPathComponent("AppIcon.png")
+            try? iconData.write(to: iconFile)
+            iconFileName = "AppIcon.png"
+        }
+        
+        let app = SignedApp(
+            id: id,
+            name: name,
+            bundleID: bundleID,
+            version: version,
+            ipaPath: destIPA.path,
+            iconFileName: iconFileName,
+            date: Date()
+        )
         apps.insert(app, at: 0)
         save()
     }
     
     func delete(_ app: SignedApp) {
-        try? FileManager.default.removeItem(atPath: app.path)
+        let appDir = appDirectory(forID: app.id)
+        try? FileManager.default.removeItem(at: appDir)
         apps.removeAll { $0.id == app.id }
         save()
     }
     
-    func documentsPath() -> String {
+    func appDirectory(forID id: UUID) -> URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.path
+        let dir = docs.appendingPathComponent("Apps").appendingPathComponent(id.uuidString)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
     }
     
-    func signedAppsPath() -> String {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let signed = docs.appendingPathComponent("Signed")
-        try? FileManager.default.createDirectory(at: signed, withIntermediateDirectories: true)
-        return signed.path
+    func appDirectory(for app: SignedApp) -> URL {
+        return appDirectory(forID: app.id)
+    }
+    
+    func iconImage(for app: SignedApp) -> UIImage? {
+        guard let fileName = app.iconFileName else { return nil }
+        let iconPath = appDirectory(for: app).appendingPathComponent(fileName)
+        return UIImage(contentsOfFile: iconPath.path)
     }
 }

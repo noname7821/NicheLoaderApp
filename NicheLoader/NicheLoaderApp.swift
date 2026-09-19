@@ -28,16 +28,21 @@ struct ContentView: View {
                     Label("Library", systemImage: "square.grid.2x2.fill")
                 }
                 .tag(1)
+            FileManagerView()
+                .tabItem {
+                    Label("Files", systemImage: "folder.fill")
+                }
+                .tag(2)
             RepoView()
                 .tabItem {
                     Label("Repos", systemImage: "globe")
                 }
-                .tag(2)
+                .tag(3)
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
-                .tag(3)
+                .tag(4)
         }
         .accentColor(.purple)
         .onChange(of: selectedTab) { _ in
