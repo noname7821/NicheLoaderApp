@@ -78,6 +78,8 @@
 				A1000051 /* RepoView.swift */,
 				A1000022 /* UpdateChecker.swift */,
 				A1000006 /* ServerAPI.swift */,
+				A1000061 /* IPAReader.swift */,
+				A1000063 /* FileManagerView.swift */,
 				A1000008 /* Info.plist */,
 				A1000031 /* Assets.xcassets */,
 			);
