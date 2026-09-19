@@ -12,6 +12,7 @@
 		A1000005 /* ServerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006 /* ServerAPI.swift */; };
 		A1000010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011 /* SettingsView.swift */; };
 		A1000012 /* TermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013 /* TermsView.swift */; };
+		A1000030 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000031 /* Assets.xcassets */; };
 		A1000021 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000022 /* UpdateChecker.swift */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +24,7 @@
 		A1000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000011 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1000013 /* TermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsView.swift; sourceTree = "<group>"; };
+		A1000031 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1000022 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -55,6 +57,7 @@
 				A1000022 /* UpdateChecker.swift */,
 				A1000006 /* ServerAPI.swift */,
 				A1000008 /* Info.plist */,
+				A1000031 /* Assets.xcassets */,
 			);
 			path = NicheLoader;
 			sourceTree = "<group>";
@@ -125,6 +128,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1000030 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
