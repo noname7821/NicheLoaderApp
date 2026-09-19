@@ -32,6 +32,8 @@
 		A1000005 /* ServerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006 /* ServerAPI.swift */; };
 		A1000010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011 /* SettingsView.swift */; };
 		A1000012 /* TermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013 /* TermsView.swift */; };
+		A1000112 /* LibraryInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000113 /* LibraryInfoSheet.swift */; };
+		A1000110 /* InstallSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000111 /* InstallSheet.swift */; };
 		A1000100 /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000101 /* DocumentPickerView.swift */; };
 		A1000090 /* SigningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000091 /* SigningView.swift */; };
 		A1000080 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000081 /* DownloadsView.swift */; };
@@ -55,6 +57,8 @@
 		A1000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000011 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1000013 /* TermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsView.swift; sourceTree = "<group>"; };
+		A1000113 /* LibraryInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryInfoSheet.swift; sourceTree = "<group>"; };
+		A1000111 /* InstallSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallSheet.swift; sourceTree = "<group>"; };
 		A1000101 /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
 		A1000091 /* SigningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigningView.swift; sourceTree = "<group>"; };
 		A1000081 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
@@ -108,6 +112,8 @@
 				A1000061 /* IPAReader.swift */,
 				A1000091 /* SigningView.swift */,
 				A1000101 /* DocumentPickerView.swift */,
+				A1000113 /* LibraryInfoSheet.swift */,
+				A1000111 /* InstallSheet.swift */,
 				A1000063 /* FileManagerView.swift */,
 				A1000081 /* DownloadsView.swift */,
 				A1000008 /* Info.plist */,
@@ -208,6 +214,8 @@
 				A1000060 /* IPAReader.swift in Sources */,
 				A1000090 /* SigningView.swift in Sources */,
 				A1000100 /* DocumentPickerView.swift in Sources */,
+				A1000112 /* LibraryInfoSheet.swift in Sources */,
+				A1000110 /* InstallSheet.swift in Sources */,
 				A1000080 /* DownloadsView.swift in Sources */,
 				A1000040 /* CertificateManager.swift in Sources */,
 				A1000042 /* LibraryManager.swift in Sources */,

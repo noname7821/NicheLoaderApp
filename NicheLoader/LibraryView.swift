@@ -1,13 +1,27 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct LibraryView: View {
     @StateObject var libraryManager = LibraryManager.shared
     @State private var selectedTab: Int = 0
     @State private var searchText = ""
     @State private var selectedApp: SignedApp?
-    @State private var importURL = false
-    @State private var importFiles = false
+    @State private var installApp: SignedApp?
+    @State private var showSignSheet = false
+    @State private var signIPAURL: URL?
     @State private var showImportMenu = false
+    @State private var showFileImporter = false
+    @State private var showURLAlert = false
+    @State private var urlInput = ""
+    @State private var editMode: EditMode = .inactive
+    @State private var selectedApps: Set<UUID> = []
+    @State private var showActionSheetFor: SignedApp?
+    
+    var apps: [SignedApp] {
+        let list = libraryManager.apps
+        if searchText.isEmpty { return list }
+        return list.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
     
     var body: some View {
         NavigationView {
@@ -23,7 +37,7 @@ struct LibraryView: View {
                 if apps.isEmpty {
                     emptyState
                 } else {
-                    appList
+                    listContent
                 }
             }
             .navigationTitle("Library")
@@ -35,12 +49,13 @@ struct LibraryView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button {
-                            importFiles = true
+                            showFileImporter = true
                         } label: {
                             Label("Import from Files", systemImage: "folder")
                         }
                         Button {
-                            importURL = true
+                            urlInput = ""
+                            showURLAlert = true
                         } label: {
                             Label("Import from URL", systemImage: "globe")
                         }
@@ -49,27 +64,47 @@ struct LibraryView: View {
                     }
                 }
             }
+            .environment(\.editMode, $editMode)
             .sheet(item: $selectedApp) { app in
                 LibraryInfoSheet(app: app)
             }
-            .sheet(isPresented: $importFiles) {
+            .sheet(item: $installApp) { app in
+                InstallSheet(app: app)
+            }
+            .sheet(isPresented: $showSignSheet) {
+                if let url = signIPAURL {
+                    SigningView(ipaURL: url)
+                }
+            }
+            .sheet(isPresented: $showFileImporter) {
                 DocumentPickerView { url in
                     importIPA(url)
                 }
             }
-            .alert("Import from URL", isPresented: $importURL) {
-                TextField("URL", text: .constant(""))
+            .alert("Import from URL", isPresented: $showURLAlert) {
+                TextField("https://example.com/app.ipa", text: $urlInput)
+                    .keyboardType(.URL)
+                    .autocapitalization(.none)
                 Button("Cancel", role: .cancel) { }
-                Button("OK") { }
+                Button("OK") {
+                    downloadAndImport()
+                }
+            } message: {
+                Text("Enter the URL of the IPA file")
             }
-            .onAppear { }
+            .confirmationDialog(
+                showActionSheetFor?.name ?? "",
+                isPresented: Binding(
+                    get: { showActionSheetFor != nil },
+                    set: { if !$0 { showActionSheetFor = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                if let app = showActionSheetFor {
+                    actionSheetButtons(for: app)
+                }
+            }
         }
-    }
-    
-    var apps: [SignedApp] {
-        let list = libraryManager.apps
-        if searchText.isEmpty { return list }
-        return list.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
     
     var emptyState: some View {
@@ -79,34 +114,34 @@ struct LibraryView: View {
                 .font(.system(size: 64))
                 .foregroundColor(.secondary)
             Text("No Apps")
-                .font(.title3).fontWeight(.semibold)
-            Text("Get started by signing your first IPA")
+                .font(.title3)
+                .fontWeight(.semibold)
+            Text("Get started by importing your first IPA file.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            
-            if selectedTab == 0 {
-                Button {
-                    importFiles = true
-                } label: {
-                    Text("Import")
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 10)
-                        .background(Color(.systemGray6))
-                        .foregroundColor(.purple)
-                        .clipShape(Capsule())
-                }
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            Button {
+                showFileImporter = true
+            } label: {
+                Text("Import")
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 10)
+                    .background(Color(.systemGray6))
+                    .foregroundColor(.purple)
+                    .clipShape(Capsule())
             }
             Spacer()
         }
     }
     
-    var appList: some View {
+    var listContent: some View {
         List {
             Section {
                 ForEach(apps) { app in
                     Button {
-                        selectedApp = app
+                        showActionSheetFor = app
                     } label: {
                         HStack(spacing: 12) {
                             if let icon = libraryManager.iconImage(for: app) {
@@ -136,44 +171,19 @@ struct LibraryView: View {
                             
                             Spacer()
                             
-                            Image(systemName: "chevron.right")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
+                            if editMode == .active {
+                                Image(systemName: selectedApps.contains(app.id) ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(selectedApps.contains(app.id) ? .purple : .secondary)
+                            } else {
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.footnote)
+                            }
                         }
                         .padding(.vertical, 4)
                     }
                     .contextMenu {
-                        Button {
-                            install(app)
-                        } label: {
-                            Label("Sign and Install", systemImage: "signature")
-                        }
-                        Button {
-                            // re-sign
-                        } label: {
-                            Label("Sign", systemImage: "signature")
-                        }
-                        Button {
-                            share(app)
-                        } label: {
-                            Label("Export", systemImage: "square.and.arrow.up")
-                        }
-                        Button {
-                            // show dylibs
-                        } label: {
-                            Label("Show Dylibs", systemImage: "list.bullet")
-                        }
-                        Button {
-                            selectedApp = app
-                        } label: {
-                            Label("Get Info", systemImage: "info.circle")
-                        }
-                        Divider()
-                        Button(role: .destructive) {
-                            libraryManager.delete(app)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
+                        contextMenuItems(for: app)
                     }
                     .swipeActions {
                         Button(role: .destructive) {
@@ -200,106 +210,102 @@ struct LibraryView: View {
         .listStyle(.insetGrouped)
     }
     
+    @ViewBuilder
+    func contextMenuItems(for app: SignedApp) -> some View {
+        Button {
+            installApp = app
+        } label: {
+            Label("Install", systemImage: "square.and.arrow.down")
+        }
+        Button {
+            signIPAURL = URL(fileURLWithPath: app.ipaPath)
+            showSignSheet = true
+        } label: {
+            Label("Re-sign", systemImage: "signature")
+        }
+        Button {
+            exportApp(app)
+        } label: {
+            Label("Export", systemImage: "square.and.arrow.up")
+        }
+        Button {
+            selectedApp = app
+        } label: {
+            Label("Get Info", systemImage: "info.circle")
+        }
+        Divider()
+        Button(role: .destructive) {
+            libraryManager.delete(app)
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+    
+    @ViewBuilder
+    func actionSheetButtons(for app: SignedApp) -> some View {
+        Button("Install") {
+            installApp = app
+            showActionSheetFor = nil
+        }
+        Button("Re-sign") {
+            signIPAURL = URL(fileURLWithPath: app.ipaPath)
+            showSignSheet = true
+            showActionSheetFor = nil
+        }
+        Button("Export") {
+            exportApp(app)
+            showActionSheetFor = nil
+        }
+        Button("Get Info") {
+            selectedApp = app
+            showActionSheetFor = nil
+        }
+        Button("Delete", role: .destructive) {
+            libraryManager.delete(app)
+            showActionSheetFor = nil
+        }
+        Button("Cancel", role: .cancel) { }
+    }
+    
     func importIPA(_ url: URL) {
-        // Copy to documents
+        // read metadata
+        let metadata = IPAReader.read(from: url.path)
+        
+        // copy IPA to Documents
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let dest = docs.appendingPathComponent(url.lastPathComponent)
         try? FileManager.default.removeItem(at: dest)
         try? FileManager.default.copyItem(at: url, to: dest)
+        
+        // add to library as "Downloaded"
+        libraryManager.add(
+            name: metadata?.name ?? url.lastPathComponent.replacingOccurrences(of: ".ipa", with: ""),
+            bundleID: metadata?.bundleID ?? "com.unknown.app",
+            version: metadata?.version ?? "1.0",
+            ipaPath: dest.path,
+            iconData: metadata?.iconData
+        )
     }
     
-    func install(_ app: SignedApp) {
-        let url = URL(string: "\(ServerAPI.baseURL)/manifest.plist")!
-        UIApplication.shared.open(URL(string: "itms-services://?action=download-manifest&url=\(url.absoluteString)")!)
-    }
-    
-    func share(_ app: SignedApp) {
-        let url = URL(fileURLWithPath: app.ipaPath)
-        let vc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let root = scene.windows.first?.rootViewController {
-            root.present(vc, animated: true)
-        }
-    }
-}
-
-struct LibraryInfoSheet: View {
-    @Environment(\.dismiss) var dismiss
-    let app: SignedApp
-    @StateObject var libraryManager = LibraryManager.shared
-    
-    var body: some View {
-        NavigationView {
-            List {
-                Section {
-                    HStack {
-                        Spacer()
-                        if let icon = libraryManager.iconImage(for: app) {
-                            Image(uiImage: icon)
-                                .resizable()
-                                .frame(width: 100, height: 100)
-                                .clipShape(RoundedRectangle(cornerRadius: 22))
-                        }
-                        Spacer()
-                    }
-                    .listRowBackground(Color.clear)
-                }
-                
-                Section("Info") {
-                    row("Name", app.name)
-                    row("Version", app.version)
-                    row("Identifier", app.bundleID)
-                    row("Date Added", app.date.formatted())
-                }
-                
-                Section("Actions") {
-                    Button {
-                        install()
-                    } label: {
-                        Label("Install", systemImage: "square.and.arrow.down")
-                            .foregroundColor(.purple)
-                    }
-                    Button {
-                        share()
-                    } label: {
-                        Label("Export", systemImage: "square.and.arrow.up")
-                            .foregroundColor(.purple)
-                    }
-                }
-                
-                Section {
-                    Button(role: .destructive) {
-                        libraryManager.delete(app)
-                        dismiss()
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                }
+    func downloadAndImport() {
+        guard let url = URL(string: urlInput), !urlInput.isEmpty else { return }
+        
+        URLSession.shared.downloadTask(with: url) { tempURL, _, error in
+            guard let tempURL = tempURL, error == nil else { return }
+            
+            let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let dest = docs.appendingPathComponent(url.lastPathComponent)
+            try? FileManager.default.removeItem(at: dest)
+            try? FileManager.default.moveItem(at: tempURL, to: dest)
+            
+            DispatchQueue.main.async {
+                importIPA(dest)
+                urlInput = ""
             }
-            .navigationTitle(app.name)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
+        }.resume()
     }
     
-    func row(_ title: String, _ value: String) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            Text(value).foregroundColor(.secondary)
-        }
-    }
-    
-    func install() {
-        let url = URL(string: "\(ServerAPI.baseURL)/manifest.plist")!
-        UIApplication.shared.open(URL(string: "itms-services://?action=download-manifest&url=\(url.absoluteString)")!)
-    }
-    
-    func share() {
+    func exportApp(_ app: SignedApp) {
         let url = URL(fileURLWithPath: app.ipaPath)
         let vc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
