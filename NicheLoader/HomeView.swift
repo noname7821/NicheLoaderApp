@@ -8,10 +8,10 @@ struct HomeView: View {
     @State private var selectedIPA: URL?
     @State private var showIPAImporter = false
     @State private var showCertPicker = false
-    @State private var showAddCert = false
     @State private var isSigning = false
     @State private var progress: Double = 0
     @State private var statusText = "Ready"
+    @State private var errorMessage: String?
     @State private var showContent = false
     
     var body: some View {
@@ -19,23 +19,22 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     // header
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         Image(systemName: "shippingbox.fill")
-                            .font(.system(size: 60))
+                            .font(.system(size: 70))
                             .foregroundStyle(
                                 LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing)
                             )
                         Text("NicheLoader")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                        Text("Sign and install IPAs with ease")
+                        Text("Sign and install IPAs")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-                    .padding(.top, 20)
-                    .opacity(showContent ? 1 : 0)
+                    .padding(.top, 30)
                     
-                    // ipa card
+                    // IPA card
                     card(title: "IPA File", icon: "doc.fill") {
                         Button {
                             showIPAImporter = true
@@ -47,64 +46,60 @@ struct HomeView: View {
                                 Spacer()
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
+                                    .font(.footnote)
                             }
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
                         }
                     }
-                    .opacity(showContent ? 1 : 0)
-                    .animation(.easeOut(duration: 0.4).delay(0.1), value: showContent)
                     
-                    // certificate card
+                    // Certificate card
                     card(title: "Certificate", icon: "lock.fill") {
-                        VStack(spacing: 10) {
-                            if let cert = certManager.selected() {
-                                Button {
-                                    showCertPicker = true
-                                } label: {
-                                    HStack {
-                                        Image(systemName: "checkmark.seal.fill")
-                                            .foregroundColor(.green)
-                                        VStack(alignment: .leading) {
-                                            Text(cert.name)
-                                                .font(.subheadline)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.primary)
-                                            Text("Tap to change")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
+                        if let cert = certManager.selected() {
+                            Button {
+                                showCertPicker = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "checkmark.seal.fill")
+                                        .foregroundColor(.green)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(cert.name)
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.primary)
+                                        Text("Tap to change")
+                                            .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(12)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.secondary)
+                                        .font(.footnote)
                                 }
-                            } else {
-                                Button {
-                                    showAddCert = true
-                                } label: {
-                                    HStack {
-                                        Text("Add Certificate")
-                                            .foregroundColor(.purple)
-                                        Spacer()
-                                        Image(systemName: "plus.circle.fill")
-                                            .foregroundColor(.purple)
-                                    }
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(12)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
+                            }
+                        } else {
+                            Button {
+                                showCertPicker = true
+                            } label: {
+                                HStack {
+                                    Text("Add Certificate")
+                                        .foregroundColor(.purple)
+                                    Spacer()
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(.purple)
                                 }
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
                             }
                         }
                     }
-                    .opacity(showContent ? 1 : 0)
-                    .animation(.easeOut(duration: 0.4).delay(0.2), value: showContent)
                     
-                    // sign button / progress
+                    // Sign button
                     if isSigning {
                         VStack(spacing: 12) {
                             ProgressView(value: progress)
@@ -140,6 +135,17 @@ struct HomeView: View {
                         .opacity((selectedIPA == nil || certManager.selected() == nil) ? 0.5 : 1)
                     }
                     
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                    }
+                    
                     Spacer()
                 }
                 .padding()
@@ -148,9 +154,6 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showIPAImporter) {
                 DocumentPickerView { url in selectedIPA = url }
-            }
-            .sheet(isPresented: $showAddCert) {
-                AddCertificateView()
             }
             .sheet(isPresented: $showCertPicker) {
                 CertificatePickerView()
@@ -184,37 +187,41 @@ struct HomeView: View {
         
         isSigning = true
         progress = 0
+        errorMessage = nil
         
         Task {
             do {
-                await updateProgress(0.1, "Reading IPA metadata...")
+                await updateProgress(0.1, "Reading metadata...")
                 let metadata = IPAReader.read(from: ipa.path) ?? IPAMetadata(bundleID: "unknown", name: ipa.lastPathComponent, version: "1.0", iconData: nil)
                 
                 await updateProgress(0.2, "Uploading IPA...")
                 try await ServerAPI.uploadIPA(ipa)
                 
                 await updateProgress(0.4, "Uploading certificate...")
-                try await ServerAPI.uploadP12(URL(fileURLWithPath: cert.p12Path))
+                try await ServerAPI.uploadP12(certManager.p12URL(for: cert))
                 
                 await updateProgress(0.5, "Uploading provision...")
-                try await ServerAPI.uploadProvision(URL(fileURLWithPath: cert.provisionPath))
+                try await ServerAPI.uploadProvision(certManager.provisionURL(for: cert))
                 
                 await updateProgress(0.6, "Sending password...")
                 try await ServerAPI.sendPassword(cert.password)
                 
-                await updateProgress(0.7, "Signing on server...")
+                await updateProgress(0.7, "Signing...")
                 try await ServerAPI.sign()
                 
-                await updateProgress(0.85, "Downloading signed IPA...")
-                let signedPath = try await downloadSignedIPA(name: ipa.lastPathComponent)
+                await updateProgress(0.85, "Downloading...")
+                let signedData = try await ServerAPI.downloadSignedIPA()
                 
-                await updateProgress(0.95, "Saving to library...")
+                let tempPath = NSTemporaryDirectory() + "/" + ipa.lastPathComponent
+                try signedData.write(to: URL(fileURLWithPath: tempPath))
+                
+                await updateProgress(0.95, "Saving...")
                 await MainActor.run {
                     libraryManager.add(
                         name: metadata.name,
                         bundleID: metadata.bundleID,
                         version: metadata.version,
-                        ipaPath: signedPath,
+                        ipaPath: tempPath,
                         iconData: metadata.iconData
                     )
                 }
@@ -222,7 +229,7 @@ struct HomeView: View {
                 await updateProgress(1.0, "Installing...")
                 ServerAPI.install()
                 
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
                 
                 await MainActor.run {
                     isSigning = false
@@ -231,7 +238,7 @@ struct HomeView: View {
             } catch {
                 await MainActor.run {
                     isSigning = false
-                    statusText = "Error: \(error.localizedDescription)"
+                    errorMessage = "Error: \(error.localizedDescription)"
                 }
             }
         }
@@ -242,16 +249,7 @@ struct HomeView: View {
             withAnimation { progress = value }
             statusText = text
         }
-        try? await Task.sleep(nanoseconds: 200_000_000)
-    }
-    
-    func downloadSignedIPA(name: String) async throws -> String {
-        let url = URL(string: "\(ServerAPI.baseURL)/output.ipa")!
-        let (data, _) = try await URLSession.shared.data(from: url)
-        
-        let tempPath = NSTemporaryDirectory() + "/" + name
-        try data.write(to: URL(fileURLWithPath: tempPath))
-        return tempPath
+        try? await Task.sleep(nanoseconds: 300_000_000)
     }
 }
 
