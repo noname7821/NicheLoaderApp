@@ -3,3 +3,7 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 .DS_Store
+NicheLoader-IPA/
+ipa_check/
+ipa_download/
+*.ipa
